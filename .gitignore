@@ -1,0 +1,8 @@
+echo "saved_summary_model/
+__pycache__/
+.venv/
+runs/
+*.pt
+*.log
+*.csv" > .gitignore
+echo ".ipynb_checkpoints/" >> .gitignore

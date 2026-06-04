@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    
+        body {
+            background: #f5f2ee;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+    
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 640px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+        }
+    
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+    
+        textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1.5px solid #e0dbd4;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: #333;
+            background: #faf9f7;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+    
+        textarea:focus {
+            border-color: #b5a898;
+        }
+    
+        button[type="submit"] {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+    
+        button[type="submit"]:hover {
+            background: #333;
+        }
+    
+        .summary-output {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1.5px solid #e0dbd4;
+        }
+    
+        #summary-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+    
+        #summary-text {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Summarizer</h1>
+        <form id = "summarization-form" action="/summarize" method="post">
+            <textarea id="dialogue-input" name="text" rows="10" cols="50" placeholder="Enter text to summarize..." required></textarea><br>
+            <button type="submit">Summarize</button>
+        </form>
+        <div class="summary-output">
+            <h3 id="summary-heading">Content Summary : </h3>
+                <p id="summary-text"></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('summarization-form').addEventListener('submit', async (e) =>{
+            e.preventDefault(); // Prevent the default form submission
+
+            const dialogueInput = document.getElementById('dialogue-input');
+            const summaryText = document.getElementById('summary-text');
+            const submitButton = e.target.querySelector("button");
+            const dialogue = dialogueInput.value.trim();
+            if(!dialogue) return;
+            // show processing message and disable the submit button
+            summaryText.innerText = 'Processing...';
+            submitButton.disabled = true;
+            try{
+                // send dialogue to backend
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ dialogue: dialogue })
+                });
+                if(!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                summaryText.innerText = data.summary || 'No summary available.';
+            }
+            catch(error ) {
+                summaryText.innerText = 'An error occurred while summarizing the text.';
+                
+            }            finally {
+                submitButton.disabled = false; // Re-enable the submit button
+            }
+        });
+    </script>
+</body>
+</html>
